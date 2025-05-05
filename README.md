@@ -26,47 +26,7 @@ Tunelar aims to create a community where producers can:
 - AWS S3 (for audio file storage)
 
 ## Project Structure
-
-tunelar/
-├── frontend/                  # React application
-│   ├── public/
-│   ├── src/
-│   │   ├── assets/           # Static assets
-│   │   ├── components/       # Reusable UI components
-│   │   ├── contexts/         # React contexts
-│   │   ├── hooks/            # Custom React hooks
-│   │   ├── pages/            # Page components
-│   │   ├── services/         # API service calls
-│   │   ├── utils/            # Helper functions
-│   │   └── App.js
-│   ├── package.json
-│   └── README.md             # Frontend specific docs
-│
-├── backend/                   # Spring Boot application
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/com/tunelar/app/
-│   │   │   │   ├── config/             # Configuration classes
-│   │   │   │   ├── controller/         # REST controllers
-│   │   │   │   ├── dto/                # Data Transfer Objects
-│   │   │   │   ├── exception/          # Custom exceptions
-│   │   │   │   ├── model/              # Entity classes
-│   │   │   │   ├── repository/         # Data access interfaces
-│   │   │   │   ├── security/           # Authentication & authorization
-│   │   │   │   ├── service/            # Business logic
-│   │   │   │   ├── util/               # Utility classes
-│   │   │   │   └── TunelarApplication.java
-│   │   │   └── resources/
-│   │   │       ├── application.properties
-│   │   │       └── db/migration/       # Database migrations
-│   │   └── test/                       # Unit and integration tests
-│   ├── pom.xml                         # Maven configuration
-│   └── README.md                       # Backend specific docs
-│
-└── docs/                               # Project documentation
-├── api-docs/                       # API documentation
-├── design/                         # Design documents
-└── diagrams/                       # System architecture diagrams
+to be added soon...
 
 ## Development Roadmap
 
