@@ -2,8 +2,7 @@ package com.tunelar.backend.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +11,9 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "samples")
+@Getter
+@Setter
+@Table(name = "tracks")
 public class Sample {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,8 +53,8 @@ public class Sample {
     
     @ManyToMany
     @JoinTable(
-        name = "sample_tags",
-        joinColumns = @JoinColumn(name = "sample_id"),
+        name = "track_tags",
+        joinColumns = @JoinColumn(name = "track_id"),
         inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private Set<Tag> tags = new HashSet<>();
@@ -66,5 +67,25 @@ public class Sample {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    @Transient
+    public boolean isSample() {
+        return this.tags.stream().anyMatch(tag -> tag.getName().equalsIgnoreCase("sample"));
+    }
+    
+    @Transient
+    public boolean isLoop() {
+        return this.tags.stream().anyMatch(tag -> tag.getName().equalsIgnoreCase("loop"));
+    }
+    
+    @Transient
+    public boolean isDrum() {
+        return this.tags.stream().anyMatch(tag -> tag.getName().equalsIgnoreCase("drum"));
+    }
+    
+    @Transient
+    public boolean isBeat() {
+        return this.tags.stream().anyMatch(tag -> tag.getName().equalsIgnoreCase("beat"));
     }
 }
