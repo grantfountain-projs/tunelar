@@ -34,12 +34,23 @@ jobs:
         distribution: 'temurin'
         cache: maven
     
-    - name: Build with Maven
-      run: |
-        cd backend
-        ./mvnw clean package -DskipTests
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
     
-    - name: Test with Maven
+    - name: Build with Maven (skip tests)
       run: |
         cd backend
-        ./mvnw test -Dspring.datasource.url=jdbc:mysql://localhost:3306/tunelar_test -Dspring.datasource.username=root -Dspring.datasource.password=${{ secrets.DB_PASSWORD }}
+        ./mvnw -B clean package -DskipTests -Dspring.profiles.active=ci
+      env:
+        MAVEN_OPTS: "-Xmx2048m"
+    
+    - name: Run Tests
+      run: |
+        cd backend
+        ./mvnw -B test -Dspring.profiles.active=ci -Dspring.datasource.url=jdbc:mysql://localhost:3306/tunelar_test -Dspring.datasource.username=root -Dspring.datasource.password=${{ secrets.DB_PASSWORD }}
+      env:
+        MAVEN_OPTS: "-Xmx2048m"
