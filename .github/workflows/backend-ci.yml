@@ -48,20 +48,9 @@ jobs:
       env:
         MAVEN_OPTS: "-Xmx2048m"
     
-    - name: Check MySQL Connection
-      run: |
-        mysql -h 127.0.0.1 -P 3306 -u root -p${{ secrets.DB_PASSWORD }} -e "SHOW DATABASES;"
-    
-    - name: Run Tests with Debug Output
+    - name: Run Tests
       run: |
         cd backend
-        ./mvnw -B test -X -Dspring.datasource.url=jdbc:mysql://localhost:3306/tunelar_test?allowPublicKeyRetrieval=true -Dspring.datasource.username=root -Dspring.datasource.password=${{ secrets.DB_PASSWORD }}
+        ./mvnw -B test -Dspring.datasource.url=jdbc:mysql://localhost:3306/tunelar_test?allowPublicKeyRetrieval=true -Dspring.datasource.username=root -Dspring.datasource.password=${{ secrets.DB_PASSWORD }}
       env:
         MAVEN_OPTS: "-Xmx2048m"
-    
-    - name: Upload Test Reports
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: surefire-reports
-        path: backend/target/surefire-reports
