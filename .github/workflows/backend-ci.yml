@@ -18,7 +18,7 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: root
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
           MYSQL_DATABASE: tunelar_test
         ports:
           - 3306:3306
@@ -35,7 +35,7 @@ jobs:
         cache: maven
     
     - name: Cache Maven packages
-      uses: actions/cache@v3.3.2
+      uses: actions/cache@v3
       with:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -43,7 +43,7 @@ jobs:
     
     - name: Check MySQL Connection
       run: |
-        mysql -h 127.0.0.1 -P 3306 -u root -proot -e "SHOW DATABASES; USE tunelar_test;"
+        mysql -h 127.0.0.1 -P 3306 -u root -p${{ secrets.DB_PASSWORD }} -e "SHOW DATABASES; USE tunelar_test;"
     
     - name: Set up test resources
       run: |
@@ -82,18 +82,17 @@ jobs:
         );
 
         -- Insert default roles
-        INSERT INTO roles (name, description) VALUES ('ROLE_USER', 'Regular user with basic privileges');
-        INSERT INTO roles (name, description) VALUES ('ROLE_PRODUCER', 'Can upload and manage audio samples');
-        INSERT INTO roles (name, description) VALUES ('ROLE_MODERATOR', 'Can moderate content and users');
+        INSERT INTO roles (name, description) VALUES ('ROLE_PROD', 'Can upload and manage audio samples');
+        INSERT INTO roles (name, description) VALUES ('ROLE_MOD', 'Can moderate content and users');
         INSERT INTO roles (name, description) VALUES ('ROLE_ADMIN', 'Has full administrative privileges');
         EOF
         
-        # Create application-test.properties
-        cat > src/test/resources/application-test.properties << 'EOF'
+        # Create application-test.properties with secret password
+        cat > src/test/resources/application-test.properties << EOF
         # Test Database Configuration
         spring.datasource.url=jdbc:mysql://localhost:3306/tunelar_test?allowPublicKeyRetrieval=true&useSSL=false
         spring.datasource.username=root
-        spring.datasource.password=root
+        spring.datasource.password=${{ secrets.DB_PASSWORD }}
 
         # Database initialization
         spring.sql.init.mode=always
@@ -120,13 +119,12 @@ jobs:
       run: |
         cd backend
         ./mvnw -B test -Dspring.profiles.active=test
-        env:
-            MAVEN_OPTS: "-Xmx2048m"
+      env:
+        MAVEN_OPTS: "-Xmx2048m"
     
-        - name: Upload Test Reports
-          if: always()
-          uses: actions/upload-artifact@v4
-          with:
-            name: surefire-reports
-            path: backend/target/surefire-reports
-            MAVEN_OPTS: "-Xmx2048m"
+    - name: Upload Test Reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: surefire-reports
+        path: backend/target/surefire-reports
