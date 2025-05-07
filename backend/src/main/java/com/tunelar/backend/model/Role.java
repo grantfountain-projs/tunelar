@@ -2,18 +2,15 @@ package com.tunelar.backend.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.*;
-import java.util.HashSet;
-import java.util.Set;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 @Entity
-@Table(name = "tags")
-public class Tag {
+@Table(name = "roles")
+public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,6 +18,6 @@ public class Tag {
     @Column(nullable = false, unique = true)
     private String name;
     
-    @ManyToMany(mappedBy = "tags")
-    private Set<Track> tracks = new HashSet<>();
+    // You can add a description field if needed
+    private String description;
 }
