@@ -14,23 +14,27 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 /**
- * Provider for JWT token generation and validation.
+ * Provides JWT token generation and validation functionality.
  */
 @Component
 public class JwtTokenProvider {
 
-    /** JWT secret key from application properties */
+    /**
+     * JWT secret from application properties
+     */
     @Value("${app.jwt-secret}")
     private String jwtSecret;
 
-    /** JWT expiration time in milliseconds from application properties */
+    /**
+     * JWT expiration time in milliseconds from application properties
+     */
     @Value("${app.jwt-expiration-milliseconds}")
     private Long jwtExpirationDate;
 
     /**
-     * Generates a JWT token based on the authentication information.
+     * Generates a JWT token for the authenticated user
      *
-     * @param authentication the authentication object containing user details
+     * @param authentication the authentication object
      * @return the generated JWT token
      */
     public String generateToken(final Authentication authentication) {
@@ -48,9 +52,9 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Creates a secret key from the JWT secret.
+     * Creates a secret key from the JWT secret
      *
-     * @return the secret key for signing and verifying tokens
+     * @return the secret key
      */
     private SecretKey key() {
         try {
@@ -71,10 +75,10 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Extracts the username from a JWT token.
+     * Extracts the username from a JWT token
      *
      * @param token the JWT token
-     * @return the username contained in the token
+     * @return the username
      */
     public String getUsername(final String token) {
         final Claims claims = Jwts.parser()
@@ -87,7 +91,7 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Validates a JWT token.
+     * Validates a JWT token
      *
      * @param token the JWT token to validate
      * @return true if the token is valid, false otherwise
