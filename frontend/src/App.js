@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Navbar from './components/layout/Navbar';
 // Import your page components
@@ -18,12 +18,12 @@ function App() {
       <div className="App">
         <Navbar />
         <main className="container">
-          <Switch>
+          <Routes>
             <Route exact path="/" component={Home} />
             <Route path="/browse" component={Browse} />
             <Route path="/upload" component={Upload} />
             <Route path="/profile" component={Profile} />
-          </Switch>
+          </Routes>
         </main>
       </div>
     </Router>
