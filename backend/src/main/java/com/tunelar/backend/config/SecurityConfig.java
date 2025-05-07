@@ -1,4 +1,4 @@
-package com.tunelar.backend.security;
+package com.tunelar.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
