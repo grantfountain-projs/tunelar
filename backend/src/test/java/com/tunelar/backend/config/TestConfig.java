@@ -2,16 +2,21 @@ package com.tunelar.backend.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 /**
  * Test configuration for Spring Boot tests.
  */
 @TestConfiguration
+@Profile("test")
 public class TestConfig {
 
     /**
@@ -25,15 +30,19 @@ public class TestConfig {
     }
     
     /**
-     * Provides an authentication manager for tests if one doesn't exist.
+     * Provides an authentication manager for tests
      * 
-     * @param authenticationConfiguration the authentication configuration
+     * @param userDetailsService the user details service
      * @return authentication manager
-     * @throws Exception if an error occurs
      */
     @Bean
-    @ConditionalOnMissingBean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    @Primary
+    public AuthenticationManager authenticationManager(
+            UserDetailsService userDetailsService, 
+            PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return new ProviderManager(provider);
     }
 }
