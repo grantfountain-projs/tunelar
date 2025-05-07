@@ -73,6 +73,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         final User user = new User();
+        user.setName( registerDto.getName() );
         user.setUsername( registerDto.getUsername() );
         user.setEmail( registerDto.getEmail() );
         user.setPassword( passwordEncoder.encode( registerDto.getPassword() ) );
@@ -184,9 +185,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
     /**
-     * GENERATIVE AI WAS USED
-     *
-     * link: https://chatgpt.com/share/67ef29a8-0188-8010-86b0-415cadfefa0d
      *
      * Updates a user's username
      *
