@@ -20,4 +20,15 @@ public class Role {
     
     // You can add a description field if needed
     private String description;
+
+    /**
+     * Returns the role name for string representation
+     * Overridden to make tests work correctly
+     * 
+     * @return the role name
+     */
+    @Override
+    public String toString() {
+        return name;
+    }
 }
