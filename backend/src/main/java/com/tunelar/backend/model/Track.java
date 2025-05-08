@@ -40,6 +40,8 @@ public class Track {
     
     private Integer bpm;
     
+    // "key" is a reserved SQL keyword, so we need to rename or escape it
+    @Column(name = "music_key")
     private String key;
     
     @Column(nullable = false)
