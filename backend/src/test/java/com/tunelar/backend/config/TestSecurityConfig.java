@@ -1,14 +1,12 @@
 package com.tunelar.backend.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,8 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Configuration
-@EnableWebSecurity
+@TestConfiguration
 @Profile("test")
 public class TestSecurityConfig {
 
@@ -53,14 +50,13 @@ public class TestSecurityConfig {
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(AbstractHttpConfigurer::disable)
-            .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
-            .authorizeHttpRequests(auth -> 
-                auth.anyRequest().permitAll()
-            );
+    @Order(1) // Higher priority than the main security config
+    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+        // Add a specific matcher to avoid conflict
+        http.securityMatcher("/**")
+            .csrf().disable()
+            .authorizeRequests()
+                .anyRequest().permitAll();
         
         return http.build();
     }
