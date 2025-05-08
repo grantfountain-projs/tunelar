@@ -2,7 +2,6 @@ package com.tunelar.backend.controller;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -15,7 +14,8 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -28,7 +28,8 @@ import com.tunelar.backend.model.Role;
 import com.tunelar.backend.model.User;
 import com.tunelar.backend.service.AuthService;
 
-@WebMvcTest(UserController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Import(MockMvcTestConfig.class)
 public class UserControllerTest {
@@ -61,7 +62,7 @@ public class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
+    @WithMockUser(roles = "ADMIN")
     public void testGetUserById() throws Exception {
         when(authService.getUserById(1L)).thenReturn(testUser);
 
@@ -74,7 +75,7 @@ public class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
+    @WithMockUser(roles = "ADMIN")
     public void testGetUserByUsername() throws Exception {
         when(authService.getUserByUsername("jestes")).thenReturn(testUser);
 
@@ -87,7 +88,7 @@ public class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
+    @WithMockUser(roles = "ADMIN")
     public void testGetAllUsers() throws Exception {
         List<User> userList = new ArrayList<>();
         userList.add(testUser);
@@ -116,10 +117,9 @@ public class UserControllerTest {
     }
     
     @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
+    @WithMockUser(roles = "ADMIN")
     public void testDeleteProducer() throws Exception {
-        // This test is moved to AuthControllerTest since the delete endpoint is in AuthController
-        // Just create a simple passing test here
+        // This test is just a placeholder since the delete endpoint is in AuthController
         when(authService.getUserById(1L)).thenReturn(testUser);
 
         mockMvc.perform(get("/api/user/byId/1")

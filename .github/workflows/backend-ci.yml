@@ -31,15 +31,6 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
     
-    - name: Add H2 database dependency to pom.xml
-      run: |
-        cd backend
-        # Add H2 dependency if it doesn't exist
-        if ! grep -q "<groupId>com.h2database</groupId>" pom.xml; then
-          sed -i '/<dependencies>/a \
-          <dependency>\n            <groupId>com.h2database</groupId>\n            <artifactId>h2</artifactId>\n            <scope>test</scope>\n        </dependency>' pom.xml
-        fi
-    
     - name: Set up test resources
       run: |
         cd backend
@@ -56,14 +47,16 @@ jobs:
         import com.tunelar.backend.security.JwtAuthenticationFilter;
         import com.tunelar.backend.security.JwtTokenProvider;
         import com.tunelar.backend.service.AuthService;
+
         import org.springframework.boot.test.mock.mockito.MockBean;
         import org.springframework.context.annotation.Bean;
         import org.springframework.context.annotation.Configuration;
         import org.springframework.context.annotation.Primary;
         import org.springframework.context.annotation.Profile;
         import org.springframework.security.authentication.AuthenticationManager;
+        import org.springframework.security.config.Customizer;
         import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-        import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+        import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
         import org.springframework.security.core.userdetails.User;
         import org.springframework.security.core.userdetails.UserDetails;
         import org.springframework.security.core.userdetails.UserDetailsService;
@@ -71,8 +64,11 @@ jobs:
         import org.springframework.security.crypto.password.PasswordEncoder;
         import org.springframework.security.provisioning.InMemoryUserDetailsManager;
         import org.springframework.security.web.SecurityFilterChain;
+        import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
+        import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
         @Configuration
+        @EnableWebSecurity
         @Profile("test")
         public class MockMvcTestConfig {
 
@@ -91,6 +87,9 @@ jobs:
             @MockBean
             private RoleRepository roleRepository;
             
+            @MockBean
+            private AuthService authService;
+
             @Bean
             public PasswordEncoder passwordEncoder() {
                 return new BCryptPasswordEncoder();
@@ -121,14 +120,20 @@ jobs:
             }
 
             @Bean
+            MvcRequestMatcher.Builder mvc(HandlerMappingIntrospector introspector) {
+                return new MvcRequestMatcher.Builder(introspector);
+            }
+
+            @Bean
             @Primary
-            public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            public SecurityFilterChain filterChain(HttpSecurity http, MvcRequestMatcher.Builder mvc) throws Exception {
                 // Disable CSRF and frame options for testing
-                http.csrf(AbstractHttpConfigurer::disable)
+                http.csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> 
-                        auth.requestMatchers("/api/auth/**").permitAll()
+                        auth.requestMatchers(mvc.pattern("/api/auth/**")).permitAll()
                             .anyRequest().authenticated()
-                    );
+                    )
+                    .httpBasic(Customizer.withDefaults());
                 
                 return http.build();
             }
@@ -143,7 +148,7 @@ jobs:
         
         # Create application-test.properties
         cat > src/test/resources/application-test.properties << EOF
-        # Use H2 in-memory database for tests with a unique DB name
+        # Use H2 in-memory database for tests with a unique DB name to avoid conflicts
         spring.datasource.url=jdbc:h2:mem:testdb_\${random.uuid};DB_CLOSE_DELAY=-1;MODE=MySQL
         spring.datasource.username=sa
         spring.datasource.password=
@@ -161,18 +166,25 @@ jobs:
         # Admin user password for tests
         app.admin-user-password=admin123
 
-        # Turn off security autoconfiguration for tests
-        spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-
         # Disable Hibernate validator in tests
         spring.jpa.properties.hibernate.validator.apply_to_ddl=false
-        
+
         # Disable full SQL logging in tests
         logging.level.org.hibernate.SQL=ERROR
         logging.level.org.hibernate.type.descriptor.sql.BasicBinder=ERROR
+
+        # Spring Security configuration
+        spring.security.user.name=testuser
+        spring.security.user.password=testpass
+
+        # Configure Spring for test environment
+        spring.main.allow-bean-definition-overriding=true
+
+        # Set application name for easier identification in logs
+        spring.application.name=tunelar-test
         EOF
     
-    - name: Build with Maven
+    - name: Build with Maven (skip tests)
       run: |
         cd backend
         ./mvnw -B clean package -DskipTests
